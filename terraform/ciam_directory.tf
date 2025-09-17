@@ -8,6 +8,7 @@ resource "azapi_resource" "ciam_directory" {
 
   body = {
     properties = {
+
       createTenantProperties = {
         countryCode  = var.country_code
         displayName = var.display_name
@@ -17,6 +18,15 @@ resource "azapi_resource" "ciam_directory" {
         billingType = "MAU"
       }
 
+      initialDomainAdministrator = var.initial_domain_administrator != null ? {
+        userPrincipalName = var.initial_domain_administrator.user_principal_name
+        displayName       = var.initial_domain_administrator.display_name
+        passwordProfile = {
+          password                      = var.initial_domain_administrator.password
+          forceChangePasswordNextSignIn = true
+        }
+        accountEnabled = true
+      } : null
    }
 
     sku = {

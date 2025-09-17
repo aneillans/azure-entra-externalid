@@ -4,12 +4,12 @@ module "ciam_directory" {
   resource_group_id = "/subscriptions/b568099c-fb2f-4e51-946f-d9e40f80e73b/resourceGroups/testing"
 
   # Required variables
-  display_name = "MyCompany External ID"
+  display_name = "MyCompany External ID2"
   country_code = "US"
   location     = "unitedstates"
 
   sku_name      = "Base"
-  domain_name   = "blahblahtest.onmicrosoft.com"
+  domain_name   = "blahblahtest2.onmicrosoft.com"
 
   # Tags
   tags = {
