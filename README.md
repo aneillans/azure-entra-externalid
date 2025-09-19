@@ -92,7 +92,7 @@ module "ciam_directory" {
 | location | The Azure region where the CIAM directory will be created (global,unitedstates,europe,asiapacific,australia,japan) | `string` | n/a | yes |
 | resource_group_id | The full Azure resource ID of the resource group where the CIAM directory will be created | `string` | n/a | yes |
 | domain_name | The custom domain name for the CIAM directory | `string` | `null` | no |
-| sku_name | The SKU name for the CIAM directory | `string` | `"PremiumP1"` | no |
+| sku_name | The SKU name for the CIAM directory (`Base`, `Standard`, `PremiumP1`, `PremiumP2`) | `string` | `"Base"` | no |
 | tags | A map of tags to assign to the CIAM directory | `map(string)` | `{}` | no |
 | initial_domain_administrator | Configuration for the initial domain administrator | `object` | `null` | no |
 
@@ -139,7 +139,7 @@ terraform apply
 
 - CIAM directories are region-specific resources
 - SKU changes may require directory recreation
-- Supported SKU values: `Standard`, `PremiumP1`, `PremiumP2`
+- Supported SKU values: `Base`, `Standard`, `PremiumP1`, `PremiumP2`
 - Custom domains can be specified but may require additional DNS configuration
 - The module creates a basic CIAM directory without advanced policy configurations
 
