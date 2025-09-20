@@ -9,14 +9,8 @@ variable "country_code" {
 }
 
 variable "location" {
-  description = "The Azure region where the CIAM directory will be created"
+  description = "The Azure region where the CIAM directory will be created (global,unitedstates,europe,asiapacific,australia,japan)"
   type        = string
-}
-
-variable "data_location" {
-  description = "The data residency location (e.g., 'United States', 'Europe', 'Asia Pacific')"
-  type        = string
-  default     = "United States"
 }
 
 variable "domain_name" {
@@ -28,18 +22,20 @@ variable "domain_name" {
 variable "sku_name" {
   description = "The SKU name for the CIAM directory"
   type        = string
-  default     = "PremiumP1"
+  default     = "Base"
   validation {
     condition = contains([
+      "Base",
+      "Standard", 
       "PremiumP1",
       "PremiumP2"
     ], var.sku_name)
-    error_message = "The sku_name must be either 'PremiumP1' or 'PremiumP2'."
+    error_message = "The sku_name must be one of: 'Base', 'Standard', 'PremiumP1', or 'PremiumP2'."
   }
 }
 
-variable "tenant_id" {
-  description = "The tenant ID where the CIAM directory will be created"
+variable "resource_group_id" {
+  description = "The full Azure resource ID of the resource group where the CIAM directory will be created"
   type        = string
 }
 
@@ -58,49 +54,4 @@ variable "initial_domain_administrator" {
   })
   sensitive = true
   default   = null
-}
-
-variable "domain_settings" {
-  description = "Domain configuration settings"
-  type = object({
-    enable_certificate_based_authentication = optional(bool, false)
-    enable_password_policy_enforcement      = optional(bool, true)
-    password_policy = optional(object({
-      minimum_length                = optional(number, 8)
-      require_uppercase             = optional(bool, true)
-      require_lowercase             = optional(bool, true)
-      require_numbers               = optional(bool, true)
-      require_special_characters    = optional(bool, true)
-      password_history_count        = optional(number, 24)
-      maximum_password_age_in_days  = optional(number, 90)
-      minimum_password_age_in_hours = optional(number, 24)
-    }), {})
-  })
-  default = {}
-}
-
-variable "security_settings" {
-  description = "Security configuration for the CIAM directory"
-  type = object({
-    enable_risk_based_access_policies = optional(bool, false)
-    enable_conditional_access         = optional(bool, false)
-    enable_identity_protection        = optional(bool, false)
-    enable_mfa_enforcement            = optional(bool, false)
-  })
-  default = {}
-}
-
-variable "branding_settings" {
-  description = "Branding configuration for the CIAM directory"
-  type = object({
-    company_name       = optional(string)
-    primary_color      = optional(string)
-    background_color   = optional(string)
-    logo_url           = optional(string)
-    favicon_url        = optional(string)
-    privacy_policy_url = optional(string)
-    terms_of_use_url   = optional(string)
-    support_url        = optional(string)
-  })
-  default = {}
 }

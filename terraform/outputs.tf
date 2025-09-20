@@ -10,39 +10,23 @@ output "name" {
 
 output "tenant_id" {
   description = "The tenant ID of the CIAM directory"
-  value       = jsondecode(azapi_resource.ciam_directory.output).properties.tenantId
+  value       = azapi_resource.ciam_directory.output.properties.tenantId
   sensitive   = true
 }
 
 output "domain_name" {
   description = "The domain name of the CIAM directory"
-  value       = jsondecode(azapi_resource.ciam_directory.output).properties.domainName
-}
-
-output "default_domain" {
-  description = "The default domain of the CIAM directory"
-  value       = jsondecode(azapi_resource.ciam_directory.output).properties.defaultDomain
-}
-
-output "ciam_directory_id" {
-  description = "The CIAM directory ID"
-  value       = jsondecode(azapi_resource.ciam_directory.output).properties.ciamDirectoryId
-  sensitive   = true
+  value       = azapi_resource.ciam_directory.output.properties.domainName
 }
 
 output "provisioning_state" {
   description = "The provisioning state of the CIAM directory"
-  value       = jsondecode(azapi_resource.ciam_directory.output).properties.provisioningState
+  value       = azapi_resource.ciam_directory.output.properties.provisioningState
 }
 
 output "location" {
   description = "The location of the CIAM directory"
   value       = azapi_resource.ciam_directory.location
-}
-
-output "data_location" {
-  description = "The data residency location of the CIAM directory"
-  value       = var.data_location
 }
 
 output "sku_name" {
@@ -53,7 +37,6 @@ output "sku_name" {
 output "initial_admin_created" {
   description = "Whether an initial domain administrator was created"
   value       = var.initial_domain_administrator != null
-  sensitive   = true
 }
 
 output "tags" {

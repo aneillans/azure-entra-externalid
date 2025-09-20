@@ -1,19 +1,19 @@
 # Azure Entra External ID Terraform Module
 
-A Terraform module that creates and manages Azure Entra External ID (CIAM) directories using the Microsoft.AzureActiveDirectory/ciamDirectories resource type.
+A simplified Terraform module that creates and manages Azure Entra External ID (CIAM) directories using the Microsoft.AzureActiveDirectory/ciamDirectories resource type.
 
 ## Overview
 
-This module provides a simple wrapper around the Azure API for creating Customer Identity and Access Management (CIAM) directories in Azure Entra External ID. It allows you to easily provision and configure external identity directories for your customer-facing applications.
+This module provides a simple wrapper around the Azure API for creating basic Customer Identity and Access Management (CIAM) directories in Azure Entra External ID. It focuses on the essential configuration needed to provision external identity directories for your customer-facing applications.
 
 ## Features
 
 - Creates Azure Entra External ID (CIAM) directories
-- Configurable password policies and security settings
-- Branding customization support
+- Basic tenant configuration with country code and display name
+- SKU selection (Standard, PremiumP1, PremiumP2)
+- Optional custom domain configuration
 - Optional initial domain administrator creation
 - Comprehensive tagging support
-- Data residency configuration
 
 ## Usage
 
@@ -23,10 +23,10 @@ This module provides a simple wrapper around the Azure API for creating Customer
 module "ciam_directory" {
   source = "./terraform"
 
-  display_name = "MyCompany External ID"
-  country_code = "US"
-  location     = "eastus"
-  tenant_id    = "your-tenant-id-here"
+  display_name      = "MyCompany External ID"
+  country_code      = "US"
+  location          = "unitedstates"
+  resource_group_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/your-resource-group-name"
 
   tags = {
     Environment = "Production"
@@ -41,37 +41,18 @@ module "ciam_directory" {
 module "ciam_directory" {
   source = "./terraform"
 
-  display_name  = "MyCompany Customer Directory"
-  country_code  = "US"
-  location      = "eastus"
-  data_location = "United States"
-  tenant_id     = "your-tenant-id-here"
-  sku_name      = "PremiumP2"
+  display_name      = "MyCompany Customer Directory"
+  country_code      = "US"
+  location          = "unitedstates"
+  resource_group_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/your-resource-group-name"
+  sku_name          = "PremiumP2"
+  domain_name       = "mycustomdomain.onmicrosoft.com"
 
-  domain_settings = {
-    enable_password_policy_enforcement = true
-    password_policy = {
-      minimum_length                   = 12
-      require_uppercase               = true
-      require_lowercase               = true
-      require_numbers                 = true
-      require_special_characters      = true
-      password_history_count          = 24
-      maximum_password_age_in_days    = 90
-    }
-  }
-
-  security_settings = {
-    enable_conditional_access  = true
-    enable_mfa_enforcement    = true
-  }
-
-  branding_settings = {
-    company_name       = "My Company"
-    primary_color      = "#0078d4"
-    background_color   = "#ffffff"
-    privacy_policy_url = "https://mycompany.com/privacy"
-    terms_of_use_url   = "https://mycompany.com/terms"
+  # Optional: Create initial domain administrator
+  initial_domain_administrator = {
+    user_principal_name = "admin@mycustomdomain.onmicrosoft.com"
+    display_name        = "External ID Administrator"
+    password            = "SecurePassword123!" # Use a secure password
   }
 
   tags = {
@@ -86,7 +67,6 @@ module "ciam_directory" {
 
 | Name | Version |
 |------|---------|
-| azurerm | ~> 4.0 |
 | azapi | ~> 2.0 |
 
 ## Providers
@@ -109,15 +89,11 @@ module "ciam_directory" {
 |------|-------------|------|---------|:--------:|
 | display_name | The display name of the CIAM directory | `string` | n/a | yes |
 | country_code | The country code for the CIAM directory (e.g., 'US', 'GB', 'DE') | `string` | n/a | yes |
-| location | The Azure region where the CIAM directory will be created | `string` | n/a | yes |
-| tenant_id | The tenant ID where the CIAM directory will be created | `string` | n/a | yes |
-| data_location | The data residency location | `string` | `"United States"` | no |
+| location | The Azure region where the CIAM directory will be created (global,unitedstates,europe,asiapacific,australia,japan) | `string` | n/a | yes |
+| resource_group_id | The full Azure resource ID of the resource group where the CIAM directory will be created | `string` | n/a | yes |
 | domain_name | The custom domain name for the CIAM directory | `string` | `null` | no |
-| sku_name | The SKU name for the CIAM directory | `string` | `"PremiumP1"` | no |
+| sku_name | The SKU name for the CIAM directory (`Base`, `Standard`, `PremiumP1`, `PremiumP2`) | `string` | `"Base"` | no |
 | tags | A map of tags to assign to the CIAM directory | `map(string)` | `{}` | no |
-| domain_settings | Domain configuration settings | `object` | `{}` | no |
-| security_settings | Security configuration for the CIAM directory | `object` | `{}` | no |
-| branding_settings | Branding configuration for the CIAM directory | `object` | `{}` | no |
 | initial_domain_administrator | Configuration for the initial domain administrator | `object` | `null` | no |
 
 ## Outputs
@@ -132,7 +108,6 @@ module "ciam_directory" {
 | ciam_directory_id | The CIAM directory ID |
 | provisioning_state | The provisioning state of the CIAM directory |
 | location | The location of the CIAM directory |
-| data_location | The data residency location of the CIAM directory |
 | sku_name | The SKU name of the CIAM directory |
 | initial_admin_created | Whether an initial domain administrator was created |
 | tags | The tags assigned to the CIAM directory |
@@ -150,7 +125,7 @@ This module requires appropriate Azure credentials with permissions to create an
 To test the module:
 
 1. Navigate to the `test/` directory
-2. Update the `testing.tf` file with your specific values (tenant ID, subscription ID, etc.)
+2. Update the `testing.tf` file with your specific values (resource group ID, etc.)
 3. Run the following commands:
 
 ```bash
@@ -164,8 +139,9 @@ terraform apply
 
 - CIAM directories are region-specific resources
 - SKU changes may require directory recreation
-- Data location affects where user data is stored and cannot be changed after creation
-- Some features require Premium P2 SKU
+- Supported SKU values: `Base`, `Standard`, `PremiumP1`, `PremiumP2`
+- Custom domains can be specified but may require additional DNS configuration
+- The module creates a basic CIAM directory without advanced policy configurations
 
 ## Support
 
