@@ -6,37 +6,38 @@ resource "azapi_resource" "ciam_directory" {
   ignore_casing             = true
   name                      = var.domain_name
 
-  body = {
-    properties = {
+  body = merge(
+    {
+      properties = merge(
+        {
+          createTenantProperties = {
+            countryCode = var.country_code
+            displayName = var.display_name
+          }
 
-      createTenantProperties = {
-        countryCode  = var.country_code
-        displayName = var.display_name
+          billingConfig = {
+            billingType = "MAU"
+          }
+        },
+        var.initial_domain_administrator != null ? {
+          initialDomainAdministrator = {
+            userPrincipalName = var.initial_domain_administrator.user_principal_name
+            displayName       = var.initial_domain_administrator.display_name
+            passwordProfile = {
+              password                      = var.initial_domain_administrator.password
+              forceChangePasswordNextSignIn = true
+            }
+            accountEnabled = true
+          }
+        } : {}
+      )
+
+      sku = {
+        name = var.sku_name
+        tier = "A0"
       }
-
-      billingConfig = {
-        billingType = "MAU"
-      }
-
-      initialDomainAdministrator = var.initial_domain_administrator != null ? {
-        userPrincipalName = var.initial_domain_administrator.user_principal_name
-        displayName       = var.initial_domain_administrator.display_name
-        passwordProfile = {
-          password                      = var.initial_domain_administrator.password
-          forceChangePasswordNextSignIn = true
-        }
-        accountEnabled = true
-      } : null
-   }
-
-    sku = {
-      name = var.sku_name
-      tier = "A0"
     }
-
-  }
-
-
+  )
 
   tags = var.tags
   
